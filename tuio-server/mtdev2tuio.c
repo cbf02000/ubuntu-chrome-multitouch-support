@@ -1,36 +1,3 @@
-/*
- * mtdev2tuio
- *
- * Copyright (C) 2011 Paolo Olivo <olivopaolo@tiscali.it>
- *
- * This tool is based on the excellent work of:
- * mtdev2tuio
- *      
- * liblo
- * 	Copyright (C) 2004 Steve Harris, Uwe Koloska (LGPL)
- *
- * mtdev - Multitouch Protocol Translation Library (MIT license)
- * 	Copyright (C) 2010 Henrik Rydberg <rydberg@euromail.se>
- * 	Copyright (C) 2010 Canonical Ltd.
- *
- *   This program is free software: you can redistribute it and/or modify
- *   it under the terms of the GNU General Public License as published by
- *   the Free Software Foundation, either version 3 of the License, or
- *   (at your option) any later version.
- *
- *   This program is distributed in the hope that it will be useful,
- *   but WITHOUT ANY WARRANTY; without even the implied warranty of
- *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *   GNU General Public License for more details.
- *
- *   You should have received a copy of the GNU General Public License
- *   along with this program.  If not, see <http://www.gnu.org/licenses/>.
- *
- ****************************************************************************/
-
-/* TODO:
-   - calculate acceleration
-*/
 #include "lo/lo.h"
 #include <mtdev.h>
 
@@ -38,7 +5,6 @@
 #include <unistd.h>
 #include <fcntl.h>
 #include <stdlib.h>
-#include <getopt.h>
 #include <signal.h>
 #include <sys/utsname.h>
 
@@ -196,36 +162,15 @@ void terminate (int param) {
 int main(int argc, char *argv[]) {
   struct state_t state ;
   struct input_event ev ;
-  static struct option long_opt[] =
-    { {"help", no_argument, 0, 'h'},
-      {"lock", no_argument, 0, 'l'},
-      {0, 0, 0, 0}
-    } ;
-  int c = 0, opt = 0, lock = 0;
-  // --- get command line options ---
-  while (c != -1) {
-    c = getopt_long(argc, argv, "hl", long_opt, &opt) ;
-    switch (c) {
-    case 'h' :
-      fprintf(stderr, "Usage: sudo ./mtdev2tuio [OPTS]... DEVICE [osc.udp://ADDRESS:PORT]\n") ;
-      fprintf(stderr, "OPTIONS\n\
-        -l | --lock\n\
-               Require an exclusive lock to grab the device (using flock(2)).\n\
-        -h | --help\n\
-               Show help.\n\
-") ;
-      return 0 ;
-    case 'l' : 
-      lock = 1 ; break ;
-    default : break ;
-    }
-  }
-  if (optind >= argc) {
-    fprintf(stderr, "Usage: sudo ./mtdev2tuio [OPTS]... DEVICE [osc.udp://ADDRESS:PORT]\n") ;
-    return -1;
-  }
-  // --- initialize device ---
-  device.filepath = argv[optind++] ;
+  int lock = 0; 
+  char devPath[1024];
+
+  // get device fd
+  FILE *fp = popen("get-touch-device-id", "r");
+  fscanf(fp, "%s", devPath);
+  pclose(fp);
+  device.filepath = devPath;
+
   device.fd = open(device.filepath, O_RDONLY | O_NONBLOCK);
   if (device.fd < 0) {
     fprintf(stderr, "error: could not open device\n");
@@ -260,10 +205,7 @@ int main(int argc, char *argv[]) {
   state.cs = 0 ;
   state.f_id = 0 ;
   // set the tuio address
-  if (optind < argc) 
-    state.tuioaddr = lo_address_new_from_url(argv[optind++]);
-  else
-    state.tuioaddr = lo_address_new(NULL, "3333");
+  state.tuioaddr = lo_address_new(NULL, "3333");
 
   fprintf(stderr, "Sending OSC/TUIO packets to %s", lo_address_get_url(state.tuioaddr)) ;
   signal (SIGINT,terminate);

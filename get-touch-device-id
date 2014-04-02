@@ -14,7 +14,7 @@ for line in result.split("\n"):
 	device = line
         continue
     if line.startswith("   name") and "Advanced Silicon S.A CoolTouch" in line:
-        print device
+        print device.strip()
         foundDevice = True
         sys.exit()
 

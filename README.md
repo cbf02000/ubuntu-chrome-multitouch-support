@@ -24,3 +24,5 @@ This toolkit uses the following open-source software packages:
 
 * mtdev2tuio (https://github.com/olivopaolo/mtdev2tuio)
 * Caress (http://caressjs.com/)
+
+Also a thanks to Amir Lazorovich for giving me pointers to Caress!

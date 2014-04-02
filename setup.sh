@@ -8,6 +8,21 @@ if [[ $EUID -ne 0 ]]; then
     exit 1
 fi
 
+PROCESS=$(ps aux | grep 'supervisord' | grep -v grep | awk '{print $2}')
+if [[ ! -z $PROCESS ]]; then
+    kill $PROCESS
+fi
+
+PROCESS=$(ps aux | grep 'mtdev2tuio' | grep -v grep | awk '{print $2}')
+if [[ ! -z $PROCESS ]]; then
+    kill $PROCESS
+fi
+
+PROCESS=$(ps aux | grep 'node' | grep -v grep | awk '{print $2}')
+if [[ ! -z $PROCESS ]]; then
+    kill $PROCESS
+fi
+
 # Install Dependencies
 add-apt-repository ppa:chris-lea/node.js
 apt-get update
@@ -23,14 +38,19 @@ cd ..
 # Install Caress Server
 cp -r ./caress-server /usr/local/.
 
-# Get Device and Initiate Supervisor
-DEVICE=`python GetInput.py`
+# Install Mouse Emulation Disabler
+cp ./disable-mouse-emulation /usr/local/bin/.
 
-cat ./supervisor-conf-template.txt |  sed -e "s,{{{ device_id }}},$DEVICE,g" > /etc/supervisor/conf.d/multitouch-support.conf
+# Install Device ID Extractor
+cp ./get-touch-device-id /usr/local/bin/.
+
+# Get Device and Initiate Supervisor
+cp ./supervisor-multitouch-support.conf /etc/supervisor/conf.d/multitouch-support.conf
 mkdir -p /var/log/multitouch-support
+service supervisor start
 supervisorctl update
 
-cp ./disable-mouse-emulation /usr/local/bin/.
+# Copy Disabler Configuration in Autostart Apps
 cp ./x-startup-script.desktop /etc/xdg/autostart/.
 
 sudo reboot
