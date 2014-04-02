@@ -1,0 +1,6 @@
+#!/bin/bash
+
+ID=`xinput list | grep -Eo 'Advanced Silicon.*id\=[0-9]{1,2}' | grep -Eo '[0-9]{1,2}'`
+
+xinput set-prop $ID "Device Enabled" 0
+echo 'Touchscreen has been disabled.'

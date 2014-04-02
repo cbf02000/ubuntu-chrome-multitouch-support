@@ -1,0 +1,6 @@
+[Desktop Entry]
+Type=Application
+Name=Disable Mouse Emulation
+Exec=/usr/local/bin/disable-mouse-emulation
+Icon=system-run
+X-GNOME-Autostart-enabled=true

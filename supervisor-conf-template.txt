@@ -1,0 +1,19 @@
+[program:caress-server]
+command=node ./node_modules/caress-server/examples/server.js 
+directory=/usr/local/caress-server/
+user=root
+redirect_stderr=true
+stdout_logfile=/var/log/multitouch-support/caress-server.log
+autostart=true
+autorestart=true
+
+[program:tuio-server]
+command=/usr/local/bin/mtdev2tuio {{{ device_id }}}
+user=root                       
+redirect_stderr=true          
+stdout_logfile=/var/log/multitouch-support/tuio-server.log
+autostart=true
+autorestart=true
+
+[group:multitouch-support]
+programs=caress-server,tuio-server
